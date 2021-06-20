@@ -1,4 +1,11 @@
-import { Controller, Get, Request, Post, UseGuards } from '@nestjs/common';
+import {
+  Get,
+  Post,
+  UseGuards,
+  Session,
+  Request,
+  Controller,
+} from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/auth.service';
@@ -17,5 +24,17 @@ export class AppController {
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+  /*
+    Manejo de sesiones
+   */
+
+  /*
+    Objeto Session
+   */
+  @Get('sessions')
+  findAllSessions(@Session() session: Record<string, any>) {
+    session.visits = session.visits ? session.visits + 1 : 1;
+    return session.visits;
   }
 }
