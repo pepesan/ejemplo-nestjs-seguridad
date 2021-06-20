@@ -6,22 +6,26 @@ import {
   Request,
   Response,
   Controller,
-  Body,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { Roles } from './auth/roles.decorator';
 import { Role } from './auth/role.enum';
+import { AuthenticatedGuard } from './auth/authenticated.guard';
+import { LoginGuard } from './auth/login.guard';
 
 @Controller()
 export class AppController {
   constructor(private authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
+  @UseGuards(LoginGuard)
   @Post('auth/login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@Request() req, @Session() session: Record<string, any>) {
+    const response = await this.authService.login(req.user);
+    session.user = response.payload;
+    return { access_token: response.access_token };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -72,8 +76,14 @@ export class AppController {
    */
   @Get('roles')
   @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthenticatedGuard)
   @Roles(Role.Admin)
-  getRole(@Request() req) {
+  getRole(@Request() req, @Session() session: Record<string, any>) {
     return req.user.roles;
+  }
+  @Get('miguard')
+  @UseGuards(AuthenticatedGuard)
+  getGuard() {
+    return 'logueado';
   }
 }

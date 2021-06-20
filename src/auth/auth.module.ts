@@ -6,6 +6,9 @@ import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
+import { RolesGuard } from './roles.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { SessionSerializer } from './session.serializer';
 
 @Module({
   imports: [
@@ -16,7 +19,16 @@ import { jwtConstants } from './constants';
       signOptions: { expiresIn: '600s' },
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    SessionSerializer,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}
