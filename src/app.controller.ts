@@ -6,10 +6,13 @@ import {
   Request,
   Response,
   Controller,
+  Body,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/auth.service';
+import { Roles } from './auth/roles.decorator';
+import { Role } from './auth/role.enum';
 
 @Controller()
 export class AppController {
@@ -24,6 +27,7 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
+    console.log(req.user);
     return req.user;
   }
   /*
@@ -59,5 +63,17 @@ export class AppController {
       maxAge: 1000 * 60 * 10,
       signed: true,
     });
+  }
+  /*
+    Manejo de Roles
+   */
+  /*
+    Acceso sólo con el rol de Admin
+   */
+  @Get('roles')
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin)
+  getRole(@Request() req) {
+    return req.user.roles;
   }
 }
