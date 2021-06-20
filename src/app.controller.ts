@@ -4,6 +4,7 @@ import {
   UseGuards,
   Session,
   Request,
+  Response,
   Controller,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -36,5 +37,27 @@ export class AppController {
   findAllSessions(@Session() session: Record<string, any>) {
     session.visits = session.visits ? session.visits + 1 : 1;
     return session.visits;
+  }
+  /*
+    Manejo de cookies
+   */
+  @Get('getcookies')
+  getCookies(@Request() request) {
+    console.log(request.cookies); // or "request.cookies['cookieKey']"
+    // or console.log(request.signedCookies);
+  }
+  @Get('setcookies')
+  SetCookie(@Response({ passthrough: true }) response) {
+    response.cookie('key1', 'value', {
+      maxAge: 1000 * 60 * 10,
+      httpOnly: true,
+    });
+    /*
+      cookie segura sólo con https
+     */
+    response.cookie('key2', 'value2', {
+      maxAge: 1000 * 60 * 10,
+      signed: true,
+    });
   }
 }
