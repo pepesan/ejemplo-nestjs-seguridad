@@ -15,8 +15,11 @@ import { Role } from './auth/role.enum';
 import { AuthenticatedGuard } from './auth/authenticated.guard';
 import { LoginGuard } from './auth/login.guard';
 
-import { createCipheriv, createDecipheriv, createHash, randomBytes, scrypt } from "crypto";
-import { promisify } from "util";
+import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
+import { promisify } from 'util';
+
+import * as bcrypt from 'bcrypt';
+
 
 @Controller()
 export class AppController {
@@ -117,6 +120,25 @@ export class AppController {
       textToCifer: textToEncrypt,
       encryptedText: encryptedText.toString(),
       decryptedText: decryptedText.toString(),
+    };
+  }
+  /*
+    Uso de hash
+  */
+  @Get('hash')
+  async hash() {
+    const saltOrRounds = 10;
+    const password = 'random_password';
+    // Generamos el hash
+    const hash = await bcrypt.hash(password, saltOrRounds);
+    const salt = await bcrypt.genSalt();
+    // Comparamos el valor
+    const isMatch = await bcrypt.compare(password, hash);
+
+    return {
+      hash: hash,
+      salt: salt,
+      isMatch: isMatch,
     };
   }
 }
