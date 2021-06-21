@@ -14,7 +14,9 @@ import { Roles } from './auth/roles.decorator';
 import { Role } from './auth/role.enum';
 import { AuthenticatedGuard } from './auth/authenticated.guard';
 import { LoginGuard } from './auth/login.guard';
-import { RolesGuard } from "./auth/roles.guard";
+
+import { createCipheriv, createDecipheriv, createHash, randomBytes, scrypt } from "crypto";
+import { promisify } from "util";
 
 @Controller()
 export class AppController {
@@ -86,5 +88,35 @@ export class AppController {
   @UseGuards(AuthenticatedGuard)
   getGuard() {
     return 'logueado';
+  }
+  /*
+    Uso de cifrado
+  */
+  @Get('cifrado')
+  async cifrado() {
+    const iv = randomBytes(16);
+    const password = 'Password used to generate key';
+
+    // generando la clave de cifrado
+    const key = (await promisify(scrypt)(password, 'salt', 32)) as Buffer;
+    const cipher = createCipheriv('aes-256-ctr', key, iv);
+    // Cifrado
+    const textToEncrypt = 'Nest';
+    const encryptedText = Buffer.concat([
+      cipher.update(textToEncrypt),
+      cipher.final(),
+    ]);
+    // Descrifrado
+    const decipher = createDecipheriv('aes-256-ctr', key, iv);
+    const decryptedText = Buffer.concat([
+      decipher.update(encryptedText),
+      decipher.final(),
+    ]);
+
+    return {
+      textToCifer: textToEncrypt,
+      encryptedText: encryptedText.toString(),
+      decryptedText: decryptedText.toString(),
+    };
   }
 }
