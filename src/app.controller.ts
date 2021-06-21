@@ -14,6 +14,7 @@ import { Roles } from './auth/roles.decorator';
 import { Role } from './auth/role.enum';
 import { AuthenticatedGuard } from './auth/authenticated.guard';
 import { LoginGuard } from './auth/login.guard';
+import { RolesGuard } from "./auth/roles.guard";
 
 @Controller()
 export class AppController {
@@ -78,7 +79,7 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @UseGuards(AuthenticatedGuard)
   @Roles(Role.Admin)
-  getRole(@Request() req, @Session() session: Record<string, any>) {
+  getRole(@Request() req) {
     return req.user.roles;
   }
   @Get('miguard')
